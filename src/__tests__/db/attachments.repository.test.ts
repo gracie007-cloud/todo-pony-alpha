@@ -6,7 +6,7 @@
 
 import { describe, test, expect, beforeEach } from 'bun:test';
 import { getTestDatabase, clearTestDatabase, testUuid } from '../utils/mock-db';
-import { createTestAttachment, DEFAULT_LIST_ID } from '../utils/fixtures';
+import { DEFAULT_LIST_ID } from '../utils/fixtures';
 import type { Attachment } from '@/lib/db/schema';
 
 // Helper to create AttachmentsRepository with test database

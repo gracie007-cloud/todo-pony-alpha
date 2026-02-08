@@ -1,9 +1,9 @@
 "use client";
 
 import * as React from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { format, formatDistanceToNow } from "date-fns";
-import { History, ArrowRight, Clock, User } from "lucide-react";
+import { History, ArrowRight, Clock } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -70,7 +70,7 @@ const formatValue = (fieldName: string, value: string | null): string => {
 export function TaskHistoryDialog({
   isOpen,
   onClose,
-  taskId,
+  taskId: _taskId,
   history,
   isLoading = false,
 }: TaskHistoryDialogProps) {

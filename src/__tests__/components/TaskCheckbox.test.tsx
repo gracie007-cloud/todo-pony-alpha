@@ -3,7 +3,7 @@
  * Tests checkbox behavior, animations, sizes, and priority variants
  */
 
-import { describe, test, expect, beforeEach, mock } from "bun:test";
+import { describe, test, expect, mock } from "bun:test";
 import type { Priority } from "@/lib/types";
 
 // Size configuration extracted from component

@@ -194,7 +194,7 @@ const RippleButton = React.forwardRef<HTMLButtonElement, ButtonProps>(
         setRipples((prev) => prev.filter((r) => r.id !== id));
       }, 600);
 
-      props.onClick?.(e as any);
+      props.onClick?.(e as React.MouseEvent<HTMLButtonElement, MouseEvent>);
     };
 
     return (

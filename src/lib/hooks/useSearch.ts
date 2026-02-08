@@ -48,12 +48,16 @@ export function useTaskSearch(
   const [query, setQuery] = useState('');
   const debouncedQuery = useDebounce(query, 200);
 
-  const searchOptions = { ...DEFAULT_SEARCH_OPTIONS, ...options };
+  // Memoize search options to avoid recreating Fuse on every render
+  const searchOptions = useMemo(
+    () => ({ ...DEFAULT_SEARCH_OPTIONS, ...options }),
+    [options]
+  );
 
   // Create Fuse instance
   const fuse = useMemo(() => {
     return new Fuse(tasks, searchOptions);
-  }, [tasks, JSON.stringify(searchOptions)]);
+  }, [tasks, searchOptions]);
 
   // Perform search
   const results = useMemo(() => {

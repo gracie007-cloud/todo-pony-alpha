@@ -90,13 +90,13 @@ export function AnimatedList<T>({
   addAnimation = "slide",
   removeAnimation = "shrink",
   duration = 0.3,
-  staggerDelay = 0,
+  staggerDelay: _staggerDelay = 0,
   className,
   itemClassName,
   enableLayout = true,
 }: AnimatedListProps<T>) {
   const reducedMotion = prefersReducedMotion();
-  const [prevItems, setPrevItems] = React.useState<T[]>(items);
+  const [_prevItems, setPrevItems] = React.useState<T[]>(items);
 
   // Track added/removed items for special animations
   React.useEffect(() => {

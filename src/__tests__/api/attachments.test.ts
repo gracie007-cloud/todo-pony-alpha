@@ -58,8 +58,13 @@ function createMockAttachmentsRepository() {
   };
 }
 
-function createMockRequest(options: { method: string; body?: unknown }) {
-  return { method: options.method, json: async () => options.body } as any;
+interface MockRequest {
+  method: string;
+  json: () => Promise<unknown>;
+}
+
+function createMockRequest(options: { method: string; body?: unknown }): MockRequest {
+  return { method: options.method, json: async () => options.body };
 }
 
 function createTestTask(): string {
@@ -75,18 +80,18 @@ function createAttachmentsApiHandler() {
   return {
     repo,
     
-    async GET(request: any, context: { params: { id: string } }) {
+    async GET(_request: MockRequest, context: { params: { id: string } }) {
       try {
         const attachments = repo.findByTaskId(context.params.id);
         return { status: 200, data: { success: true, data: attachments } };
-      } catch (error) {
+      } catch {
         return { status: 500, data: { success: false, error: 'Failed to fetch attachments' } };
       }
     },
     
-    async POST(request: any, context: { params: { id: string } }) {
+    async POST(request: MockRequest, context: { params: { id: string } }) {
       try {
-        const body = await request.json();
+        const body = await request.json() as { filename?: string; file_path?: string; file_size?: number; mime_type?: string };
         
         if (!body.filename) {
           return { status: 400, data: { success: false, error: 'filename is required' } };
@@ -119,7 +124,7 @@ function createAttachmentsApiHandler() {
           mime_type: body.mime_type,
         });
         return { status: 201, data: { success: true, data: attachment } };
-      } catch (error) {
+      } catch {
         return { status: 500, data: { success: false, error: 'Failed to create attachment' } };
       }
     },
@@ -131,19 +136,19 @@ function createAttachmentByIdApiHandler() {
   return {
     repo,
     
-    async GET(request: any, context: { params: { id: string; attachmentId: string } }) {
+    async GET(_request: MockRequest, context: { params: { id: string; attachmentId: string } }) {
       try {
         const attachment = repo.findById(context.params.attachmentId);
         if (!attachment) {
           return { status: 404, data: { success: false, error: 'Attachment not found' } };
         }
         return { status: 200, data: { success: true, data: attachment } };
-      } catch (error) {
+      } catch {
         return { status: 500, data: { success: false, error: 'Failed to fetch attachment' } };
       }
     },
     
-    async DELETE(request: any, context: { params: { id: string; attachmentId: string } }) {
+    async DELETE(_request: MockRequest, context: { params: { id: string; attachmentId: string } }) {
       try {
         const attachment = repo.findById(context.params.attachmentId);
         if (!attachment) {
@@ -154,7 +159,7 @@ function createAttachmentByIdApiHandler() {
           return { status: 500, data: { success: false, error: 'Failed to delete attachment' } };
         }
         return { status: 200, data: { success: true, data: null } };
-      } catch (error) {
+      } catch {
         return { status: 500, data: { success: false, error: 'Failed to delete attachment' } };
       }
     },

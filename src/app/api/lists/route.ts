@@ -7,7 +7,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { getListsRepository } from '@/lib/db/repositories';
-import { createListSchema, schemas } from '@/lib/db/schema';
+import { createListSchema } from '@/lib/db/schema';
 import { z } from 'zod';
 
 export async function GET() {

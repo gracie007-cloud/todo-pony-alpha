@@ -347,7 +347,7 @@ export function getUniqueLists(tasks: TaskWithRelations[]): List[] {
   return Array.from(listMap.values());
 }
 
-export default {
+const taskUtils = {
   isTaskOverdue,
   isTaskDueToday,
   isTaskDueWithin,
@@ -377,3 +377,5 @@ export default {
   getUniqueLabels,
   getUniqueLists,
 };
+
+export default taskUtils;

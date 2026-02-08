@@ -3,9 +3,9 @@
  * Tests grouping, filtering, rendering, and empty states
  */
 
-import { describe, test, expect, beforeEach, mock } from "bun:test";
-import { format, parseISO, isToday, isTomorrow, isPast, startOfDay } from "date-fns";
-import type { TaskWithRelations, Priority, List, Label, Subtask } from "@/lib/types";
+import { describe, test, expect } from "bun:test";
+import { format, parseISO, isToday, isTomorrow, isPast } from "date-fns";
+import type { TaskWithRelations, Priority, List } from "@/lib/types";
 
 // Animation variants extracted from component
 const containerVariants = {

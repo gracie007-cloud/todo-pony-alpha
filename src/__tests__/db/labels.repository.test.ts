@@ -6,7 +6,7 @@
 
 import { describe, test, expect, beforeEach } from 'bun:test';
 import { getTestDatabase, clearTestDatabase, testUuid } from '../utils/mock-db';
-import { createTestLabel, DEFAULT_LIST_ID } from '../utils/fixtures';
+import { DEFAULT_LIST_ID } from '../utils/fixtures';
 import type { Label } from '@/lib/db/schema';
 
 // Helper to create LabelsRepository with test database

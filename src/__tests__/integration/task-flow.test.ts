@@ -5,15 +5,12 @@
 
 import { describe, test, expect, beforeEach, afterEach } from "bun:test";
 import { createMockDatabase, type MockDatabase } from "../utils/mock-db";
-import { createTestFixtures, type TestFixtures } from "../utils/fixtures";
 
 describe("Task Flow Integration", () => {
   let db: MockDatabase;
-  let fixtures: TestFixtures;
 
   beforeEach(() => {
     db = createMockDatabase();
-    fixtures = createTestFixtures();
   });
 
   afterEach(() => {
@@ -122,7 +119,7 @@ describe("Task Flow Integration", () => {
       db.tasks.addLabels(task.id, [label1.id, label2.id]);
 
       // Add reminder
-      const reminder = db.reminders.create({
+      db.reminders.create({
         taskId: task.id,
         datetime: new Date(Date.now() + 86400000).toISOString(),
         notified: false,
@@ -277,7 +274,7 @@ describe("Task Flow Integration", () => {
         size: 1024,
       });
 
-      const attachment2 = db.attachments.create({
+      db.attachments.create({
         taskId: task.id,
         filename: "image.png",
         filepath: "/uploads/image.png",
@@ -427,18 +424,18 @@ describe("Task Flow Integration", () => {
     });
 
     test("should maintain data integrity on error", () => {
-      const task1 = db.tasks.create({ name: "Task 1" });
+      db.tasks.create({ name: "Task 1" });
       
       // Attempt invalid operation
       try {
         db.tasks.create({ name: "" });
-      } catch (e) {
+      } catch {
         // Expected error
       }
       
       // Verify existing data is intact
-      const existingTask = db.tasks.findById(task1.id);
-      expect(existingTask).not.toBeNull();
+      const allTasks = db.tasks.findMany();
+      expect(allTasks.length).toBe(1);
     });
   });
 });

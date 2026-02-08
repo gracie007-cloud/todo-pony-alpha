@@ -14,7 +14,7 @@ import type { TaskWithRelations } from "@/lib/types";
 
 export default function WeekPage() {
   const { tasks, isLoading, isError, mutate } = useWeekTasks();
-  const { toggleComplete, update, remove } = useTaskMutations();
+  const { toggleComplete, remove } = useTaskMutations();
   
   const {
     taskDialogOpen,

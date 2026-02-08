@@ -4,7 +4,7 @@
  * Tests for isOverdue, groupByDate, sortByPriority.
  */
 
-import { describe, test, expect, beforeEach } from 'bun:test';
+import { describe, test, expect } from 'bun:test';
 import {
   isTaskOverdue,
   isTaskDueToday,
@@ -35,8 +35,8 @@ import {
   getUniqueLabels,
   getUniqueLists,
 } from '@/lib/utils/task-utils';
-import type { Task, TaskWithRelations, Priority, List, Label } from '@/lib/db/schema';
-import { testDates, createTestTask, createTestList, createTestLabel } from '../utils/fixtures';
+import type { Task, TaskWithRelations, List, Label } from '@/lib/db/schema';
+import { testDates, createTestList, createTestLabel } from '../utils/fixtures';
 
 // Helper to create a complete task for testing
 function createTask(overrides: Partial<Task> = {}): Task {

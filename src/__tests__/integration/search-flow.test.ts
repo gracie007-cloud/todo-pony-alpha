@@ -5,7 +5,6 @@
 
 import { describe, test, expect, beforeEach, afterEach } from "bun:test";
 import { createMockDatabase, type MockDatabase } from "../utils/mock-db";
-import { createTestFixtures, type TestFixtures } from "../utils/fixtures";
 
 // Simulated search function (similar to Fuse.js behavior)
 function searchTasks(
@@ -120,11 +119,9 @@ function filterTasks(
 
 describe("Search Flow Integration", () => {
   let db: MockDatabase;
-  let fixtures: TestFixtures;
 
   beforeEach(() => {
     db = createMockDatabase();
-    fixtures = createTestFixtures();
   });
 
   afterEach(() => {
@@ -370,7 +367,6 @@ describe("Search Flow Integration", () => {
     });
 
     test("should find tasks with multiple labels", () => {
-      const labels = db.labels.findMany();
       const allTasks = db.tasks.findMany();
 
       const tasksWithBothLabels = allTasks.filter((task) => {

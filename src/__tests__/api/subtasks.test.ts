@@ -87,11 +87,16 @@ function createMockSubtasksRepository() {
   };
 }
 
-function createMockRequest(options: { method: string; body?: unknown }) {
+interface MockRequest {
+  method: string;
+  json: () => Promise<unknown>;
+}
+
+function createMockRequest(options: { method: string; body?: unknown }): MockRequest {
   return {
     method: options.method,
     json: async () => options.body,
-  } as any;
+  };
 }
 
 function createTestTask(): string {
@@ -107,18 +112,18 @@ function createSubtasksApiHandler() {
   return {
     repo,
     
-    async GET(request: any, context: { params: { id: string } }) {
+    async GET(_request: MockRequest, context: { params: { id: string } }) {
       try {
         const subtasks = repo.findByTaskId(context.params.id);
         return { status: 200, data: { success: true, data: subtasks } };
-      } catch (error) {
+      } catch {
         return { status: 500, data: { success: false, error: 'Failed to fetch subtasks' } };
       }
     },
     
-    async POST(request: any, context: { params: { id: string } }) {
+    async POST(request: MockRequest, context: { params: { id: string } }) {
       try {
-        const body = await request.json();
+        const body = await request.json() as { name?: string; completed?: boolean };
         
         if (!body.name || typeof body.name !== 'string' || body.name.trim().length === 0) {
           return { status: 400, data: { success: false, error: 'Subtask name is required' } };
@@ -126,7 +131,7 @@ function createSubtasksApiHandler() {
         
         const subtask = repo.create({ task_id: context.params.id, name: body.name, completed: body.completed });
         return { status: 201, data: { success: true, data: subtask } };
-      } catch (error) {
+      } catch {
         return { status: 500, data: { success: false, error: 'Failed to create subtask' } };
       }
     },
@@ -138,32 +143,32 @@ function createSubtaskByIdApiHandler() {
   return {
     repo,
     
-    async GET(request: any, context: { params: { id: string; subtaskId: string } }) {
+    async GET(_request: MockRequest, context: { params: { id: string; subtaskId: string } }) {
       try {
         const subtask = repo.findById(context.params.subtaskId);
         if (!subtask) {
           return { status: 404, data: { success: false, error: 'Subtask not found' } };
         }
         return { status: 200, data: { success: true, data: subtask } };
-      } catch (error) {
+      } catch {
         return { status: 500, data: { success: false, error: 'Failed to fetch subtask' } };
       }
     },
     
-    async PUT(request: any, context: { params: { id: string; subtaskId: string } }) {
+    async PUT(request: MockRequest, context: { params: { id: string; subtaskId: string } }) {
       try {
-        const body = await request.json();
+        const body = await request.json() as Partial<{ name: string; completed: boolean; order: number }>;
         const updated = repo.update(context.params.subtaskId, body);
         if (!updated) {
           return { status: 404, data: { success: false, error: 'Subtask not found' } };
         }
         return { status: 200, data: { success: true, data: updated } };
-      } catch (error) {
+      } catch {
         return { status: 500, data: { success: false, error: 'Failed to update subtask' } };
       }
     },
     
-    async DELETE(request: any, context: { params: { id: string; subtaskId: string } }) {
+    async DELETE(_request: MockRequest, context: { params: { id: string; subtaskId: string } }) {
       try {
         const subtask = repo.findById(context.params.subtaskId);
         if (!subtask) {
@@ -174,7 +179,7 @@ function createSubtaskByIdApiHandler() {
           return { status: 500, data: { success: false, error: 'Failed to delete subtask' } };
         }
         return { status: 200, data: { success: true, data: null } };
-      } catch (error) {
+      } catch {
         return { status: 500, data: { success: false, error: 'Failed to delete subtask' } };
       }
     },

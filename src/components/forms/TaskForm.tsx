@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { motion } from "framer-motion";
-import { Calendar, Clock, Tag, Flag, Repeat, List, Plus, X } from "lucide-react";
+import { Calendar, Clock, Tag, Flag, Repeat, List, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,9 +10,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { DatePicker, QuickDatePicker } from "./DatePicker";
-import { TimeInput, DurationInput, QuickDurationPicker } from "./TimeInput";
-import { PrioritySelect, PriorityButtonGroup } from "./PrioritySelect";
-import { RecurrencePicker, QuickRecurrencePicker } from "./RecurrencePicker";
+import { QuickDurationPicker } from "./TimeInput";
+import { PriorityButtonGroup } from "./PrioritySelect";
+import { QuickRecurrencePicker } from "./RecurrencePicker";
 import { LabelPicker } from "@/components/tasks/TaskLabels";
 import type { TaskFormData, Priority, Label as LabelType, List as ListType } from "@/lib/types";
 
@@ -253,7 +253,7 @@ export function TaskForm({
 
 // Inline quick add form
 export function TaskFormInline({
-  listId,
+  listId: _listId,
   onSubmit,
   className,
 }: {

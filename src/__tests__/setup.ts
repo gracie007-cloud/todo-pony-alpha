@@ -4,7 +4,7 @@
  * This file is run before all tests to set up the test environment.
  */
 
-import { beforeAll, beforeEach, afterEach, afterAll } from 'bun:test';
+import { beforeAll, beforeEach, afterAll } from 'bun:test';
 import { setupTestDatabase, teardownTestDatabase, clearTestDatabase } from './utils/mock-db';
 
 // Set test environment

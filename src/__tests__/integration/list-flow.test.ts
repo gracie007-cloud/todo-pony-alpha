@@ -5,15 +5,12 @@
 
 import { describe, test, expect, beforeEach, afterEach } from "bun:test";
 import { createMockDatabase, type MockDatabase } from "../utils/mock-db";
-import { createTestFixtures, type TestFixtures } from "../utils/fixtures";
 
 describe("List Flow Integration", () => {
   let db: MockDatabase;
-  let fixtures: TestFixtures;
 
   beforeEach(() => {
     db = createMockDatabase();
-    fixtures = createTestFixtures();
   });
 
   afterEach(() => {
@@ -66,13 +63,13 @@ describe("List Flow Integration", () => {
       });
 
       // Add tasks to list
-      const task1 = db.tasks.create({
+      db.tasks.create({
         name: "Buy groceries",
         listId: list.id,
         priority: "medium",
       });
 
-      const task2 = db.tasks.create({
+      db.tasks.create({
         name: "Buy clothes",
         listId: list.id,
         priority: "low",
@@ -87,7 +84,7 @@ describe("List Flow Integration", () => {
       expect(taskCount).toBe(2);
 
       // Complete one task
-      db.tasks.update(task1.id, { completed: true });
+      db.tasks.update(tasksInList[0].id, { completed: true });
       
       const completedCount = db.lists.getTaskCount(list.id, true);
       const pendingCount = db.lists.getTaskCount(list.id, false);
@@ -150,9 +147,9 @@ describe("List Flow Integration", () => {
 
   describe("List Ordering", () => {
     test("should maintain list order", () => {
-      const list1 = db.lists.create({ name: "List A", order: 0 });
-      const list2 = db.lists.create({ name: "List B", order: 1 });
-      const list3 = db.lists.create({ name: "List C", order: 2 });
+      db.lists.create({ name: "List A", order: 0 });
+      db.lists.create({ name: "List B", order: 1 });
+      db.lists.create({ name: "List C", order: 2 });
 
       const allLists = db.lists.findMany();
       expect(allLists[0].name).toBe("List A");
@@ -428,16 +425,16 @@ describe("List Flow Integration", () => {
     });
 
     test("should maintain data integrity on error", () => {
-      const list1 = db.lists.create({ name: "Existing List" });
+      db.lists.create({ name: "Existing List" });
       
       try {
         db.lists.create({ name: "" });
-      } catch (e) {
+      } catch {
         // Expected error
       }
       
-      const existingList = db.lists.findById(list1.id);
-      expect(existingList).not.toBeNull();
+      const allLists = db.lists.findMany();
+      expect(allLists.length).toBe(1);
     });
   });
 });

@@ -4,11 +4,11 @@
  * Utilities for rendering React components in tests with Bun.
  */
 
-import { render, cleanup } from '@testing-library/react';
+import { render } from '@testing-library/react';
 import type { ReactElement } from 'react';
 
 // Re-export testing library utilities
-export { render, cleanup, screen, fireEvent, waitFor } from '@testing-library/react';
+export { render, screen, fireEvent, waitFor } from '@testing-library/react';
 export { default as userEvent } from '@testing-library/user-event';
 
 /**

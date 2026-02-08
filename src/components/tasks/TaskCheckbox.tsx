@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { motion, AnimatePresence, useSpring, useTransform } from "framer-motion";
+import { motion, AnimatePresence, useSpring } from "framer-motion";
 import { Check, CheckCheck } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { prefersReducedMotion } from "@/lib/utils/view-transition";
@@ -48,7 +48,6 @@ export function TaskCheckbox({
 }: TaskCheckboxProps) {
   const config = sizeConfig[size];
   const reducedMotion = prefersReducedMotion();
-  const [isPressed, setIsPressed] = React.useState(false);
 
   return (
     <motion.button
@@ -59,8 +58,6 @@ export function TaskCheckbox({
       onClick={() => onCheckedChange?.(!checked)}
       whileHover={disabled || reducedMotion ? undefined : { scale: 1.1 }}
       whileTap={disabled || reducedMotion ? undefined : { scale: 0.9 }}
-      onAnimationStart={() => setIsPressed(true)}
-      onAnimationComplete={() => setIsPressed(false)}
       className={cn(
         "relative flex items-center justify-center rounded-full border-2 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
         config.container,

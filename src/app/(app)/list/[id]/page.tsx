@@ -3,7 +3,7 @@
 import * as React from "react";
 import { useParams } from "next/navigation";
 import { motion } from "framer-motion";
-import { Plus, Folder, Loader2 } from "lucide-react";
+import { Plus, Folder } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { TaskList } from "@/components/tasks";
 import { NoTasksEmptyState, LoadingSpinner } from "@/components/common";

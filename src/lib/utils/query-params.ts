@@ -83,9 +83,11 @@ export function cleanParams(params: Record<string, unknown>): Record<string, unk
   return cleaned;
 }
 
-export default {
+const queryParams = {
   buildQueryString,
   parseQueryString,
   mergeQueryParams,
   cleanParams,
 };
+
+export default queryParams;

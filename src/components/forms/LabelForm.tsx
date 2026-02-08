@@ -35,7 +35,7 @@ export function LabelForm({
 }: LabelFormProps) {
   const [name, setName] = React.useState(initialData?.name || "");
   const [color, setColor] = React.useState(initialData?.color || "#8b5cf6");
-  const [icon, setIcon] = React.useState<string | null>(initialData?.icon || null);
+  const [icon, _setIcon] = React.useState<string | null>(initialData?.icon || null);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();

@@ -24,17 +24,6 @@ interface StaggerContainerProps {
   margin?: `${number}px` | `${number}px ${number}px` | `${number}px ${number}px ${number}px ${number}px`;
 }
 
-const containerVariants: Variants = {
-  hidden: { opacity: 1 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.05,
-      delayChildren: 0,
-    },
-  },
-};
-
 /**
  * StaggerContainer - Staggers the animation of its children
  * Children will animate in sequence with a delay between each
@@ -54,28 +43,27 @@ export function StaggerContainer({
   const isInView = useInView(ref, { once: triggerOnce, margin });
   const reducedMotion = prefersReducedMotion();
 
-  // Calculate direction offset
-  const getDirectionOffset = () => {
-    switch (direction) {
-      case "up":
-        return { y: distance };
-      case "down":
-        return { y: -distance };
-      case "left":
-        return { x: distance };
-      case "right":
-        return { x: -distance };
-      default:
-        return { y: distance };
-    }
-  };
-
-  // Child animation variants
-  const childVariants: Variants = React.useMemo(
-    () => ({
+  // Child animation variants - calculate direction offset inline
+  const childVariants: Variants = React.useMemo(() => {
+    const directionOffset = (() => {
+      switch (direction) {
+        case "up":
+          return { y: distance };
+        case "down":
+          return { y: -distance };
+        case "left":
+          return { x: distance };
+        case "right":
+          return { x: -distance };
+        default:
+          return { y: distance };
+      }
+    })();
+    
+    return {
       hidden: {
         opacity: 0,
-        ...getDirectionOffset(),
+        ...directionOffset,
       },
       visible: {
         opacity: 1,
@@ -86,9 +74,8 @@ export function StaggerContainer({
           ease: [0.25, 0.1, 0.25, 1],
         },
       },
-    }),
-    [childDuration, direction, distance]
-  );
+    };
+  }, [childDuration, direction, distance]);
 
   // Container variants with custom stagger
   const customContainerVariants: Variants = React.useMemo(

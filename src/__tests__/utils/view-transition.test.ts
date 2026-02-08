@@ -4,7 +4,7 @@
  * Tests for view transition utilities.
  */
 
-import { describe, test, expect, beforeEach, mock } from 'bun:test';
+import { describe, test, expect } from 'bun:test';
 import {
   supportsViewTransitions,
   prefersReducedMotion,
@@ -29,7 +29,7 @@ describe('View Transition Utilities', () => {
       const originalDocument = global.document;
       global.document = {
         startViewTransition: () => ({}),
-      } as any;
+      } as unknown as Document;
       
       const result = supportsViewTransitions();
       expect(result).toBe(true);
@@ -47,7 +47,7 @@ describe('View Transition Utilities', () => {
     
     test('should check matchMedia for reduced motion', () => {
       const originalMatchMedia = window.matchMedia;
-      window.matchMedia = () => ({ matches: true } as any);
+      window.matchMedia = () => ({ matches: true } as unknown as MediaQueryList);
       
       const result = prefersReducedMotion();
       expect(result).toBe(true);
@@ -70,7 +70,7 @@ describe('View Transition Utilities', () => {
     
     test('should call update callback when reduced motion preferred', async () => {
       const originalMatchMedia = window.matchMedia;
-      window.matchMedia = () => ({ matches: true } as any);
+      window.matchMedia = () => ({ matches: true } as unknown as MediaQueryList);
       
       let called = false;
       const update = async () => {
@@ -86,7 +86,7 @@ describe('View Transition Utilities', () => {
     
     test('should not skip when skipIfReducedMotion is false', async () => {
       const originalMatchMedia = window.matchMedia;
-      window.matchMedia = () => ({ matches: true } as any);
+      window.matchMedia = () => ({ matches: true } as unknown as MediaQueryList);
       
       let called = false;
       const update = async () => {

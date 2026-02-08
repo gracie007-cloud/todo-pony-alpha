@@ -6,7 +6,7 @@
 
 import { describe, test, expect, beforeEach } from 'bun:test';
 import { getTestDatabase, clearTestDatabase, testUuid } from '../utils/mock-db';
-import { createTestReminder, DEFAULT_LIST_ID, testDates } from '../utils/fixtures';
+import { DEFAULT_LIST_ID, testDates } from '../utils/fixtures';
 import type { Reminder } from '@/lib/db/schema';
 
 // Helper to create RemindersRepository with test database

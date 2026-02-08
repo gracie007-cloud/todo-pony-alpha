@@ -6,7 +6,7 @@
 
 import { describe, test, expect, beforeEach } from 'bun:test';
 import { getTestDatabase, clearTestDatabase, testUuid } from '../utils/mock-db';
-import { createTestTask, DEFAULT_LIST_ID, testDates } from '../utils/fixtures';
+import { DEFAULT_LIST_ID, testDates } from '../utils/fixtures';
 import type { Task, Priority } from '@/lib/db/schema';
 
 // Helper to create TasksRepository with test database
@@ -154,11 +154,29 @@ function createMockTasksRepository() {
 }
 
 // Mock request helper
+interface MockRequest {
+  method: string;
+  url: string;
+  json: () => Promise<unknown>;
+  nextUrl: URL;
+}
+
+interface TaskFilters {
+  listId?: string;
+  dateFrom?: string;
+  dateTo?: string;
+  completed?: boolean;
+  priority?: Priority;
+  overdue?: boolean;
+  search?: string;
+  labelId?: string;
+}
+
 function createMockRequest(options: {
   method: string;
   body?: unknown;
   url?: string;
-}) {
+}): MockRequest {
   const url = new URL(options.url || 'http://localhost/api/tasks');
   
   return {
@@ -166,7 +184,7 @@ function createMockRequest(options: {
     url: options.url || 'http://localhost/api/tasks',
     json: async () => options.body,
     nextUrl: url,
-  } as any;
+  };
 }
 
 // Simulate API handlers
@@ -176,11 +194,11 @@ function createTasksApiHandler() {
   return {
     repo,
     
-    async GET(request: any) {
+    async GET(request: MockRequest) {
       try {
         const { searchParams } = new URL(request.url);
         
-        const filters: any = {};
+        const filters: TaskFilters = {};
         
         const listId = searchParams.get('listId');
         if (listId) filters.listId = listId;
@@ -196,7 +214,7 @@ function createTasksApiHandler() {
         
         const priority = searchParams.get('priority');
         if (priority && ['high', 'medium', 'low', 'none'].includes(priority)) {
-          filters.priority = priority;
+          filters.priority = priority as Priority;
         }
         
         const overdue = searchParams.get('overdue');
@@ -216,14 +234,24 @@ function createTasksApiHandler() {
         }
         
         return { status: 200, data: { success: true, data: tasks, count: tasks.length } };
-      } catch (error) {
+      } catch {
         return { status: 500, data: { success: false, error: 'Failed to fetch tasks' } };
       }
     },
     
-    async POST(request: any) {
+    async POST(request: MockRequest) {
       try {
-        const body = await request.json();
+        const body = await request.json() as {
+          list_id?: string;
+          name?: string;
+          description?: string | null;
+          date?: string | null;
+          deadline?: string | null;
+          estimate_minutes?: number | null;
+          actual_minutes?: number | null;
+          priority?: Priority;
+          recurring_rule?: string | null;
+        };
         
         // Validate required fields
         if (!body.name || typeof body.name !== 'string' || body.name.length === 0) {
@@ -247,7 +275,7 @@ function createTasksApiHandler() {
         });
         
         return { status: 201, data: { success: true, data: task } };
-      } catch (error) {
+      } catch {
         return { status: 500, data: { success: false, error: 'Failed to create task' } };
       }
     },
@@ -260,7 +288,7 @@ function createTaskByIdApiHandler() {
   return {
     repo,
     
-    async GET(request: any, context: { params: { id: string } }) {
+    async GET(_request: MockRequest, context: { params: { id: string } }) {
       try {
         const task = repo.findById(context.params.id);
         
@@ -269,14 +297,25 @@ function createTaskByIdApiHandler() {
         }
         
         return { status: 200, data: { success: true, data: task } };
-      } catch (error) {
+      } catch {
         return { status: 500, data: { success: false, error: 'Failed to fetch task' } };
       }
     },
     
-    async PUT(request: any, context: { params: { id: string } }) {
+    async PUT(request: MockRequest, context: { params: { id: string } }) {
       try {
-        const body = await request.json();
+        const body = await request.json() as Partial<{
+          list_id: string;
+          name: string;
+          description: string | null;
+          date: string | null;
+          deadline: string | null;
+          estimate_minutes: number | null;
+          actual_minutes: number | null;
+          priority: Priority;
+          recurring_rule: string | null;
+          completed: boolean;
+        }>;
         const updated = repo.update(context.params.id, body);
         
         if (!updated) {
@@ -284,12 +323,12 @@ function createTaskByIdApiHandler() {
         }
         
         return { status: 200, data: { success: true, data: updated } };
-      } catch (error) {
+      } catch {
         return { status: 500, data: { success: false, error: 'Failed to update task' } };
       }
     },
     
-    async DELETE(request: any, context: { params: { id: string } }) {
+    async DELETE(_request: MockRequest, context: { params: { id: string } }) {
       try {
         const task = repo.findById(context.params.id);
         if (!task) {
@@ -303,7 +342,7 @@ function createTaskByIdApiHandler() {
         }
         
         return { status: 200, data: { success: true, data: null } };
-      } catch (error) {
+      } catch {
         return { status: 500, data: { success: false, error: 'Failed to delete task' } };
       }
     },
@@ -357,7 +396,7 @@ describe('Tasks API', () => {
     });
     
     test('should filter by completion status', async () => {
-      const task1 = handler.repo.create({ list_id: DEFAULT_LIST_ID, name: 'Incomplete' });
+      handler.repo.create({ list_id: DEFAULT_LIST_ID, name: 'Incomplete' });
       const task2 = handler.repo.create({ list_id: DEFAULT_LIST_ID, name: 'Complete' });
       handler.repo.update(task2.id, { completed: true });
       

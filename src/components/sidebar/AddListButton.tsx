@@ -19,7 +19,7 @@ export function AddListButton({
   variant = "list",
   className,
 }: AddListButtonProps) {
-  const Icon = variant === "list" ? FolderPlus : Tag;
+  const _Icon = variant === "list" ? FolderPlus : Tag;
   const label = variant === "list" ? "Add List" : "Add Label";
   
   if (isCollapsed) {

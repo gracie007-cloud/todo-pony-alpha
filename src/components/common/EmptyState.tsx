@@ -2,15 +2,14 @@
 
 import * as React from "react";
 import { motion } from "framer-motion";
-import { 
-  CheckCircle2, 
-  ClipboardList, 
-  Inbox, 
-  ListTodo, 
+import {
+  CheckCircle2,
+  ClipboardList,
+  Inbox,
+  ListTodo,
   Search,
   AlertCircle,
   FolderOpen,
-  type LucideIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";

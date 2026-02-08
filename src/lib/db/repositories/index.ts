@@ -20,14 +20,6 @@ export type { TaskHistoryWithDetails } from './task-history.repository';
 
 // Convenience function to get all repositories
 export function getAllRepositories() {
-  const { getListsRepository } = require('./lists.repository');
-  const { getTasksRepository } = require('./tasks.repository');
-  const { getLabelsRepository, getTaskLabelsRepository } = require('./labels.repository');
-  const { getSubtasksRepository } = require('./subtasks.repository');
-  const { getRemindersRepository } = require('./reminders.repository');
-  const { getAttachmentsRepository } = require('./attachments.repository');
-  const { getTaskHistoryRepository } = require('./task-history.repository');
-  
   return {
     lists: getListsRepository(),
     tasks: getTasksRepository(),

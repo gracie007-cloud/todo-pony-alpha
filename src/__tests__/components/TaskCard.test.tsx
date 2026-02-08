@@ -3,7 +3,7 @@
  * Tests rendering logic, interactions, swipe gestures, and display variants
  */
 
-import { describe, test, expect, beforeEach, mock } from "bun:test";
+import { describe, test, expect, mock } from "bun:test";
 import type { TaskWithRelations, Priority, List, Label, Subtask } from "@/lib/types";
 
 // Animation variants extracted from component
@@ -556,7 +556,7 @@ describe("TaskCard Edge Cases", () => {
       completed: i < 10,
     } as Subtask));
     
-    const task = createMockTask({ subtasks });
+    createMockTask({ subtasks });
     const progress = calculateSubtaskProgress(subtasks);
     
     expect(progress.completed).toBe(10);

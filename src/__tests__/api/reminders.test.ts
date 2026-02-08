@@ -71,8 +71,13 @@ function createMockRemindersRepository() {
   };
 }
 
-function createMockRequest(options: { method: string; body?: unknown }) {
-  return { method: options.method, json: async () => options.body } as any;
+interface MockRequest {
+  method: string;
+  json: () => Promise<unknown>;
+}
+
+function createMockRequest(options: { method: string; body?: unknown }): MockRequest {
+  return { method: options.method, json: async () => options.body };
 }
 
 function createTestTask(): string {
@@ -88,18 +93,18 @@ function createRemindersApiHandler() {
   return {
     repo,
     
-    async GET(request: any, context: { params: { id: string } }) {
+    async GET(_request: MockRequest, context: { params: { id: string } }) {
       try {
         const reminders = repo.findByTaskId(context.params.id);
         return { status: 200, data: { success: true, data: reminders } };
-      } catch (error) {
+      } catch {
         return { status: 500, data: { success: false, error: 'Failed to fetch reminders' } };
       }
     },
     
-    async POST(request: any, context: { params: { id: string } }) {
+    async POST(request: MockRequest, context: { params: { id: string } }) {
       try {
-        const body = await request.json();
+        const body = await request.json() as { remind_at?: string; type?: 'notification' | 'email' };
         
         if (!body.remind_at) {
           return { status: 400, data: { success: false, error: 'remind_at is required' } };
@@ -111,7 +116,7 @@ function createRemindersApiHandler() {
           type: body.type,
         });
         return { status: 201, data: { success: true, data: reminder } };
-      } catch (error) {
+      } catch {
         return { status: 500, data: { success: false, error: 'Failed to create reminder' } };
       }
     },
@@ -123,32 +128,32 @@ function createReminderByIdApiHandler() {
   return {
     repo,
     
-    async GET(request: any, context: { params: { id: string; reminderId: string } }) {
+    async GET(_request: MockRequest, context: { params: { id: string; reminderId: string } }) {
       try {
         const reminder = repo.findById(context.params.reminderId);
         if (!reminder) {
           return { status: 404, data: { success: false, error: 'Reminder not found' } };
         }
         return { status: 200, data: { success: true, data: reminder } };
-      } catch (error) {
+      } catch {
         return { status: 500, data: { success: false, error: 'Failed to fetch reminder' } };
       }
     },
     
-    async PUT(request: any, context: { params: { id: string; reminderId: string } }) {
+    async PUT(request: MockRequest, context: { params: { id: string; reminderId: string } }) {
       try {
-        const body = await request.json();
+        const body = await request.json() as Partial<{ remind_at: string; type: 'notification' | 'email' }>;
         const updated = repo.update(context.params.reminderId, body);
         if (!updated) {
           return { status: 404, data: { success: false, error: 'Reminder not found' } };
         }
         return { status: 200, data: { success: true, data: updated } };
-      } catch (error) {
+      } catch {
         return { status: 500, data: { success: false, error: 'Failed to update reminder' } };
       }
     },
     
-    async DELETE(request: any, context: { params: { id: string; reminderId: string } }) {
+    async DELETE(_request: MockRequest, context: { params: { id: string; reminderId: string } }) {
       try {
         const reminder = repo.findById(context.params.reminderId);
         if (!reminder) {
@@ -159,7 +164,7 @@ function createReminderByIdApiHandler() {
           return { status: 500, data: { success: false, error: 'Failed to delete reminder' } };
         }
         return { status: 200, data: { success: true, data: null } };
-      } catch (error) {
+      } catch {
         return { status: 500, data: { success: false, error: 'Failed to delete reminder' } };
       }
     },

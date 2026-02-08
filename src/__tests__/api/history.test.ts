@@ -50,8 +50,13 @@ function createMockTaskHistoryRepository() {
   };
 }
 
-function createMockRequest(options: { method: string; body?: unknown }) {
-  return { method: options.method, json: async () => options.body } as any;
+interface MockRequest {
+  method: string;
+  json: () => Promise<unknown>;
+}
+
+function createMockRequest(options: { method: string; body?: unknown }): MockRequest {
+  return { method: options.method, json: async () => options.body };
 }
 
 function createTestTask(): string {
@@ -67,11 +72,11 @@ function createHistoryApiHandler() {
   return {
     repo,
     
-    async GET(request: any, context: { params: { id: string } }) {
+    async GET(_request: MockRequest, context: { params: { id: string } }) {
       try {
         const history = repo.findByTaskId(context.params.id);
         return { status: 200, data: { success: true, data: history, count: history.length } };
-      } catch (error) {
+      } catch {
         return { status: 500, data: { success: false, error: 'Failed to fetch history' } };
       }
     },

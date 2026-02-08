@@ -20,7 +20,7 @@ import { LabelItem } from "./LabelItem";
 import { AddListButton } from "./AddListButton";
 import { useLists, useLabels, useTodayTasks, useWeekTasks, useAllTasks, useCompletedTasks } from "@/lib/hooks";
 import { useAppStore } from "@/lib/store";
-import type { ViewType, ListWithTaskCount, Label } from "@/lib/types";
+import type { ViewType } from "@/lib/types";
 
 interface SidebarContentProps {
   isCollapsed?: boolean;

@@ -4,7 +4,6 @@ import * as React from "react";
 import { motion } from "framer-motion";
 import { ArrowUp, ArrowDown, Minus, ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
 import {
   Select,
   SelectContent,

@@ -152,8 +152,6 @@ function DialogAnimated({
   children,
   ...props
 }: { isOpen: boolean } & React.ComponentProps<typeof Dialog>) {
-  const reducedMotion = prefersReducedMotion()
-  
   return (
     <AnimatePresence>
       {isOpen && (

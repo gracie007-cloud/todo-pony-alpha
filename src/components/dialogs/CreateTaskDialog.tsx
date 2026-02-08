@@ -95,10 +95,10 @@ export function CreateTaskDialog() {
 }
 
 // Quick add task button component
-export function QuickAddTask({ listId }: { listId?: string }) {
+export function QuickAddTask({ listId: _listId }: { listId?: string }) {
   const { openTaskDialog } = useAppStore();
-  const { lists } = useLists();
-  const { create } = useTaskMutations();
+  const [_lists] = useLists();
+  const [_create] = useTaskMutations();
   const [isCreating, setIsCreating] = React.useState(false);
 
   const handleClick = () => {

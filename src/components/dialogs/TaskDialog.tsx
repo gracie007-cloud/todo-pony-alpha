@@ -1,7 +1,6 @@
 "use client";
 
 import * as React from "react";
-import { motion, AnimatePresence } from "framer-motion";
 import {
   Calendar,
   Clock,
@@ -13,9 +12,7 @@ import {
   Trash2,
   Edit,
   Copy,
-  Archive,
   History,
-  X,
 } from "lucide-react";
 import { TaskCheckboxPriority } from "@/components/tasks/TaskCheckbox";
 import { cn } from "@/lib/utils";
@@ -29,7 +26,6 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogDescription,
 } from "@/components/ui/dialog";
 import {
   DropdownMenu,
@@ -38,11 +34,11 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { PriorityBadge, PriorityDot } from "@/components/tasks/PriorityBadge";
+import { PriorityBadge } from "@/components/tasks/PriorityBadge";
 import { TaskDueDate, TaskTimeEstimate } from "@/components/tasks/TaskDueDate";
 import { TaskLabels } from "@/components/tasks/TaskLabels";
 import { SubtaskProgress, SubtaskChecklist } from "@/components/tasks/SubtaskProgress";
-import type { TaskWithRelations, Priority } from "@/lib/types";
+import type { TaskWithRelations } from "@/lib/types";
 
 interface TaskDialogProps {
   task: TaskWithRelations | null;
@@ -286,7 +282,7 @@ export function TaskDialog({
                     name: s.name,
                     completed: s.completed,
                   }))}
-                  onToggle={(id) => {
+                  onToggle={(_id) => {
                     // Handle subtask toggle
                   }}
                 />

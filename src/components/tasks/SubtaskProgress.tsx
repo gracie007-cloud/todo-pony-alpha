@@ -159,7 +159,6 @@ export function SubtaskMiniProgress({
 }) {
   if (total === 0) return null;
 
-  const percentage = (completed / total) * 100;
   const isComplete = completed === total;
 
   return (

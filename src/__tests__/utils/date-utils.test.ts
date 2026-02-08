@@ -4,7 +4,7 @@
  * Tests for date formatting, parsing, and ranges.
  */
 
-import { describe, test, expect, beforeEach } from 'bun:test';
+import { describe, test, expect } from 'bun:test';
 import {
   formatDate,
   formatDateTime,
@@ -24,7 +24,6 @@ import {
   parseDate,
   getDaysUntil,
 } from '@/lib/utils/date-utils';
-import { testDates } from '../utils/fixtures';
 
 describe('Date Utilities', () => {
   describe('formatDate', () => {

@@ -4,35 +4,31 @@
  * Responsive design helper for media queries.
  */
 
-import { useState, useEffect } from 'react';
+import { useSyncExternalStore } from 'react';
+
+function getMediaQuerySnapshot(query: string): boolean {
+  if (typeof window === 'undefined') {
+    return false;
+  }
+  return window.matchMedia(query).matches;
+}
+
+function subscribeToMediaQuery(query: string, callback: () => void): () => void {
+  if (typeof window === 'undefined') {
+    return () => {};
+  }
+  
+  const media = window.matchMedia(query);
+  media.addEventListener('change', callback);
+  return () => media.removeEventListener('change', callback);
+}
 
 export function useMediaQuery(query: string): boolean {
-  const [matches, setMatches] = useState<boolean>(false);
-
-  useEffect(() => {
-    if (typeof window === 'undefined') {
-      return;
-    }
-
-    const media = window.matchMedia(query);
-    
-    // Set initial value
-    setMatches(media.matches);
-
-    // Define listener
-    const listener = (e: MediaQueryListEvent) => {
-      setMatches(e.matches);
-    };
-
-    // Add listener
-    media.addEventListener('change', listener);
-
-    return () => {
-      media.removeEventListener('change', listener);
-    };
-  }, [query]);
-
-  return matches;
+  const subscribe = (callback: () => void) => subscribeToMediaQuery(query, callback);
+  const getSnapshot = () => getMediaQuerySnapshot(query);
+  const getServerSnapshot = () => false;
+  
+  return useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
 }
 
 // Predefined breakpoint hooks

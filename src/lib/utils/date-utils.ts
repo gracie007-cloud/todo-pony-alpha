@@ -257,7 +257,7 @@ export function getDaysUntil(date: Date | string | null): number | null {
   return differenceInDays(startOfDay(d), startOfDay(new Date()));
 }
 
-export default {
+const dateUtils = {
   formatDate,
   formatDateTime,
   formatTime,
@@ -276,3 +276,5 @@ export default {
   parseDate,
   getDaysUntil,
 };
+
+export default dateUtils;

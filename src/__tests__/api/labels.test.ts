@@ -6,7 +6,7 @@
 
 import { describe, test, expect, beforeEach } from 'bun:test';
 import { getTestDatabase, clearTestDatabase, testUuid } from '../utils/mock-db';
-import { createTestLabel, DEFAULT_LIST_ID } from '../utils/fixtures';
+import { DEFAULT_LIST_ID } from '../utils/fixtures';
 import type { Label } from '@/lib/db/schema';
 
 // Helper to create LabelsRepository with test database
@@ -95,12 +95,18 @@ function createMockLabelsRepository() {
   };
 }
 
-function createMockRequest(options: { method: string; body?: unknown; url?: string }) {
+interface MockRequest {
+  method: string;
+  url: string;
+  json: () => Promise<unknown>;
+}
+
+function createMockRequest(options: { method: string; body?: unknown; url?: string }): MockRequest {
   return {
     method: options.method,
     url: options.url || 'http://localhost/api/labels',
     json: async () => options.body,
-  } as any;
+  };
 }
 
 function createLabelsApiHandler() {
@@ -113,14 +119,14 @@ function createLabelsApiHandler() {
       try {
         const labels = repo.findAll();
         return { status: 200, data: { success: true, data: labels } };
-      } catch (error) {
+      } catch {
         return { status: 500, data: { success: false, error: 'Failed to fetch labels' } };
       }
     },
     
-    async POST(request: any) {
+    async POST(request: MockRequest) {
       try {
-        const body = await request.json();
+        const body = await request.json() as { name?: string; color?: string; icon?: string };
         
         if (!body.name || typeof body.name !== 'string' || body.name.trim().length === 0) {
           return { status: 400, data: { success: false, error: 'Validation error', details: [{ message: 'Label name is required' }] } };
@@ -136,7 +142,7 @@ function createLabelsApiHandler() {
         
         const label = repo.create({ name: body.name, color: body.color, icon: body.icon });
         return { status: 201, data: { success: true, data: label } };
-      } catch (error) {
+      } catch {
         return { status: 500, data: { success: false, error: 'Failed to create label' } };
       }
     },
@@ -149,21 +155,21 @@ function createLabelByIdApiHandler() {
   return {
     repo,
     
-    async GET(request: any, context: { params: { id: string } }) {
+    async GET(_request: MockRequest, context: { params: { id: string } }) {
       try {
         const label = repo.findById(context.params.id);
         if (!label) {
           return { status: 404, data: { success: false, error: 'Label not found' } };
         }
         return { status: 200, data: { success: true, data: label } };
-      } catch (error) {
+      } catch {
         return { status: 500, data: { success: false, error: 'Failed to fetch label' } };
       }
     },
     
-    async PUT(request: any, context: { params: { id: string } }) {
+    async PUT(request: MockRequest, context: { params: { id: string } }) {
       try {
-        const body = await request.json();
+        const body = await request.json() as { name?: string; color?: string; icon?: string };
         
         if (body.name && repo.nameExists(body.name, context.params.id)) {
           return { status: 409, data: { success: false, error: 'Label with this name already exists' } };
@@ -174,12 +180,12 @@ function createLabelByIdApiHandler() {
           return { status: 404, data: { success: false, error: 'Label not found' } };
         }
         return { status: 200, data: { success: true, data: updated } };
-      } catch (error) {
+      } catch {
         return { status: 500, data: { success: false, error: 'Failed to update label' } };
       }
     },
     
-    async DELETE(request: any, context: { params: { id: string } }) {
+    async DELETE(_request: MockRequest, context: { params: { id: string } }) {
       try {
         const label = repo.findById(context.params.id);
         if (!label) {
@@ -191,7 +197,7 @@ function createLabelByIdApiHandler() {
           return { status: 500, data: { success: false, error: 'Failed to delete label' } };
         }
         return { status: 200, data: { success: true, data: null } };
-      } catch (error) {
+      } catch {
         return { status: 500, data: { success: false, error: 'Failed to delete label' } };
       }
     },

@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { motion } from "framer-motion";
-import { Plus, Loader2 } from "lucide-react";
+import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { TaskList } from "@/components/tasks";
 import { NoTasksEmptyState, LoadingSpinner } from "@/components/common";
@@ -19,7 +19,6 @@ export default function HomePage() {
   const {
     taskDialogOpen,
     taskDialogTaskId,
-    taskDialogMode,
     openTaskDialog,
     closeTaskDialog,
     deleteDialogOpen,

@@ -3,7 +3,7 @@
 import * as React from "react";
 import { useParams } from "next/navigation";
 import { motion } from "framer-motion";
-import { Plus, Tag, Loader2 } from "lucide-react";
+import { Plus, Tag } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { TaskList } from "@/components/tasks";
 import { NoTasksEmptyState, LoadingSpinner } from "@/components/common";

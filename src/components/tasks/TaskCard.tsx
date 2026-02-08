@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { motion, AnimatePresence, PanInfo, useMotionValue, useTransform } from "framer-motion";
+import { motion, PanInfo, useMotionValue, useTransform } from "framer-motion";
 import { MoreHorizontal, GripVertical, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -9,7 +9,7 @@ import { TaskCheckboxPriority } from "./TaskCheckbox";
 import { PriorityDot } from "./PriorityBadge";
 import { TaskDueDate } from "./TaskDueDate";
 import { TaskLabels } from "./TaskLabels";
-import { SubtaskProgress, SubtaskMiniProgress } from "./SubtaskProgress";
+import { SubtaskMiniProgress } from "./SubtaskProgress";
 import { prefersReducedMotion, createTransitionName } from "@/lib/utils/view-transition";
 import type { TaskWithRelations } from "@/lib/types";
 

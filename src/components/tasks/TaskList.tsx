@@ -2,8 +2,8 @@
 
 import * as React from "react";
 import { motion, AnimatePresence, Variants, LayoutGroup } from "framer-motion";
-import { format, parseISO, isToday, isTomorrow, isPast, startOfDay } from "date-fns";
-import { ChevronDown, Loader2 } from "lucide-react";
+import { format, parseISO, isToday, isTomorrow, isPast } from "date-fns";
+import { ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { TaskCard, TaskCardSkeleton } from "./TaskCard";
 import { TaskItem } from "./TaskItem";
@@ -79,7 +79,7 @@ export function TaskList({
   variant = "card",
   onToggleComplete,
   onTaskClick,
-  emptyMessage = "No tasks",
+  emptyMessage: _emptyMessage = "No tasks",
   showCompleted = true,
   className,
   isLoading = false,
@@ -87,31 +87,11 @@ export function TaskList({
   const reducedMotion = prefersReducedMotion();
 
   // Filter tasks based on showCompleted
-  const visibleTasks = showCompleted 
-    ? tasks 
+  const visibleTasks = showCompleted
+    ? tasks
     : tasks.filter((t) => !t.completed);
 
-  // Loading state with skeletons
-  if (isLoading) {
-    return (
-      <div className={cn("space-y-2", className)}>
-        {[...Array(3)].map((_, i) => (
-          <TaskCardSkeleton key={i} />
-        ))}
-      </div>
-    );
-  }
-
-  // Empty states
-  if (visibleTasks.length === 0) {
-    const completedCount = tasks.filter((t) => t.completed).length;
-    if (completedCount === tasks.length && tasks.length > 0) {
-      return <AllTasksCompletedState />;
-    }
-    return <NoTasksEmptyState />;
-  }
-
-  // Group tasks
+  // Group tasks - must be called before any early returns
   const groupedTasks = React.useMemo(() => {
     if (groupBy === "none") {
       return { "": visibleTasks };
@@ -173,6 +153,26 @@ export function TaskList({
 
     return groups;
   }, [visibleTasks, groupBy]);
+
+  // Loading state with skeletons
+  if (isLoading) {
+    return (
+      <div className={cn("space-y-2", className)}>
+        {[...Array(3)].map((_, i) => (
+          <TaskCardSkeleton key={i} />
+        ))}
+      </div>
+    );
+  }
+
+  // Empty states
+  if (visibleTasks.length === 0) {
+    const completedCount = tasks.filter((t) => t.completed).length;
+    if (completedCount === tasks.length && tasks.length > 0) {
+      return <AllTasksCompletedState />;
+    }
+    return <NoTasksEmptyState />;
+  }
 
   return (
     <LayoutGroup>
@@ -364,7 +364,7 @@ export function TaskListFlat({
         className={cn("space-y-1", className)}
       >
         <AnimatePresence mode="popLayout">
-          {tasks.map((task, index) => (
+          {tasks.map((task) => (
             <motion.div
               key={task.id}
               variants={itemVariants}

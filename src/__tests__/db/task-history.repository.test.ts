@@ -6,7 +6,7 @@
 
 import { describe, test, expect, beforeEach } from 'bun:test';
 import { getTestDatabase, clearTestDatabase, testUuid } from '../utils/mock-db';
-import { createTestHistory, DEFAULT_LIST_ID, testDates } from '../utils/fixtures';
+import { DEFAULT_LIST_ID, testDates } from '../utils/fixtures';
 import type { TaskHistory } from '@/lib/db/schema';
 
 // Helper to create TaskHistoryRepository with test database

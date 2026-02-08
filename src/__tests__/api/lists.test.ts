@@ -4,9 +4,9 @@
  * Tests for GET, POST, PUT, DELETE endpoints.
  */
 
-import { describe, test, expect, beforeEach, mock } from 'bun:test';
+import { describe, test, expect, beforeEach } from 'bun:test';
 import { getTestDatabase, clearTestDatabase, testUuid } from '../utils/mock-db';
-import { createTestList, DEFAULT_LIST_ID } from '../utils/fixtures';
+import { DEFAULT_LIST_ID } from '../utils/fixtures';
 import type { List } from '@/lib/db/schema';
 
 // Mock repository
@@ -120,11 +120,18 @@ function createMockListsRepository() {
 }
 
 // Mock NextRequest and NextResponse
+interface MockRequest {
+  method: string;
+  url: string;
+  json: () => Promise<unknown>;
+  nextUrl: URL;
+}
+
 function createMockRequest(options: {
   method: string;
   body?: unknown;
   url?: string;
-}) {
+}): MockRequest {
   const url = new URL(options.url || 'http://localhost/api/lists');
   
   return {
@@ -132,27 +139,6 @@ function createMockRequest(options: {
     url: options.url || 'http://localhost/api/lists',
     json: async () => options.body,
     nextUrl: url,
-  } as any;
-}
-
-function createMockResponse() {
-  let statusCode = 200;
-  let jsonData: any = null;
-  
-  return {
-    status: (code: number) => {
-      statusCode = code;
-      return {
-        json: (data: any) => {
-          jsonData = data;
-          return { status: statusCode, data: jsonData };
-        },
-      };
-    },
-    json: (data: any) => {
-      jsonData = data;
-      return { status: statusCode, data: jsonData };
-    },
   };
 }
 
@@ -167,14 +153,14 @@ function createListsApiHandler() {
       try {
         const lists = repo.findAllWithTaskCounts();
         return { status: 200, data: { success: true, data: lists } };
-      } catch (error) {
+      } catch {
         return { status: 500, data: { success: false, error: 'Failed to fetch lists' } };
       }
     },
     
-    async POST(request: any) {
+    async POST(request: MockRequest) {
       try {
-        const body = await request.json();
+        const body = await request.json() as { name?: string; color?: string; emoji?: string; is_default?: boolean };
         
         // Validate required fields
         if (!body.name || typeof body.name !== 'string' || body.name.length === 0) {
@@ -193,7 +179,7 @@ function createListsApiHandler() {
         });
         
         return { status: 201, data: { success: true, data: list } };
-      } catch (error) {
+      } catch {
         return { status: 500, data: { success: false, error: 'Failed to create list' } };
       }
     },
@@ -206,7 +192,7 @@ function createListByIdApiHandler() {
   return {
     repo,
     
-    async GET(request: any, context: { params: { id: string } }) {
+    async GET(_request: MockRequest, context: { params: { id: string } }) {
       try {
         const list = repo.findById(context.params.id);
         
@@ -215,14 +201,14 @@ function createListByIdApiHandler() {
         }
         
         return { status: 200, data: { success: true, data: list } };
-      } catch (error) {
+      } catch {
         return { status: 500, data: { success: false, error: 'Failed to fetch list' } };
       }
     },
     
-    async PUT(request: any, context: { params: { id: string } }) {
+    async PUT(request: MockRequest, context: { params: { id: string } }) {
       try {
-        const body = await request.json();
+        const body = await request.json() as Partial<{ name: string; color: string; emoji: string | null; is_default: boolean }>;
         const updated = repo.update(context.params.id, body);
         
         if (!updated) {
@@ -230,12 +216,12 @@ function createListByIdApiHandler() {
         }
         
         return { status: 200, data: { success: true, data: updated } };
-      } catch (error) {
+      } catch {
         return { status: 500, data: { success: false, error: 'Failed to update list' } };
       }
     },
     
-    async DELETE(request: any, context: { params: { id: string } }) {
+    async DELETE(_request: MockRequest, context: { params: { id: string } }) {
       try {
         // Check if list exists
         const list = repo.findById(context.params.id);
@@ -260,7 +246,7 @@ function createListByIdApiHandler() {
         }
         
         return { status: 200, data: { success: true, data: null } };
-      } catch (error) {
+      } catch {
         return { status: 500, data: { success: false, error: 'Failed to delete list' } };
       }
     },
@@ -276,7 +262,7 @@ describe('Lists API', () => {
     handler = createListsApiHandler();
     byIdHandler = createListByIdApiHandler();
     // Share the same repo between handlers
-    (byIdHandler as any).repo = handler.repo;
+    byIdHandler.repo = handler.repo;
   });
   
   describe('GET /api/lists', () => {
@@ -291,21 +277,22 @@ describe('Lists API', () => {
     
     test('should include default list', async () => {
       const response = await handler.GET();
-      const lists = response.data.data;
+      const lists = response.data.data as Array<List & { task_count: number; completed_count: number }>;
       
-      const defaultList = lists.find((l: any) => l.is_default);
+      const defaultList = lists.find((l) => l.is_default);
       expect(defaultList).toBeDefined();
-      expect(defaultList.name).toBe('Inbox');
+      expect(defaultList!.name).toBe('Inbox');
     });
     
     test('should return lists with task counts', async () => {
       handler.repo.create({ name: 'Custom List' });
       
       const response = await handler.GET();
-      const customList = response.data.data.find((l: any) => l.name === 'Custom List');
+      const lists = response.data.data as Array<List & { task_count: number; completed_count: number }>;
+      const customList = lists.find((l) => l.name === 'Custom List');
       
-      expect(customList.task_count).toBeDefined();
-      expect(customList.completed_count).toBeDefined();
+      expect(customList!.task_count).toBeDefined();
+      expect(customList!.completed_count).toBeDefined();
     });
   });
   

@@ -1,7 +1,6 @@
 "use client";
 
 import { Toaster, toast } from "sonner";
-import { motion, AnimatePresence } from "framer-motion";
 
 // Custom toast wrapper with animations
 export function ToastProvider() {

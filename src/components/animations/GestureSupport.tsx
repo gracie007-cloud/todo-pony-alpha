@@ -1,8 +1,8 @@
 "use client";
 
 import * as React from "react";
-import { motion, useMotionValue, useTransform, PanInfo, AnimatePresence } from "framer-motion";
-import { Check, Trash2, MoreHorizontal } from "lucide-react";
+import { motion, useMotionValue, useTransform, PanInfo } from "framer-motion";
+import { Check, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { prefersReducedMotion } from "@/lib/utils/view-transition";
 
@@ -49,7 +49,7 @@ export function SwipeableRow({
   hapticFeedback = true,
 }: SwipeableRowProps) {
   const x = useMotionValue(0);
-  const [isDragging, setIsDragging] = React.useState(false);
+  const [_isDragging, setIsDragging] = React.useState(false);
   const reducedMotion = prefersReducedMotion();
 
   // Background color based on swipe direction
@@ -292,6 +292,8 @@ export function PullToRefresh({
   // Indicator opacity and rotation based on pull distance
   const indicatorOpacity = useTransform(y, [0, indicatorHeight], [0, 1]);
   const indicatorRotation = useTransform(y, [0, indicatorHeight * 2], [0, 360]);
+  // Indicator Y position - must be called before conditional return
+  const indicatorY = useTransform(y, (val: number) => Math.min(val - indicatorHeight, 0));
 
   const handleDragEnd = async (event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
     if (info.offset.y > indicatorHeight && !isRefreshing) {
@@ -322,7 +324,7 @@ export function PullToRefresh({
         style={{
           height: indicatorHeight,
           opacity: indicatorOpacity,
-          y: useTransform(y, (val) => Math.min(val - indicatorHeight, 0)),
+          y: indicatorY,
         }}
       >
         <motion.div
@@ -374,8 +376,8 @@ interface PinchToZoomProps {
 
 export function PinchToZoom({
   children,
-  minScale = 0.5,
-  maxScale = 3,
+  minScale: _minScale = 0.5,
+  maxScale: _maxScale = 3,
   className,
 }: PinchToZoomProps) {
   const scale = useMotionValue(1);

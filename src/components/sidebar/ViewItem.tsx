@@ -2,13 +2,12 @@
 
 import * as React from "react";
 import { motion } from "framer-motion";
-import { 
-  Inbox, 
-  Calendar, 
-  CalendarDays, 
-  CheckCircle2, 
+import {
+  Inbox,
+  Calendar,
+  CalendarDays,
+  CheckCircle2,
   ListTodo,
-  Flag,
   type LucideIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -31,14 +30,6 @@ const viewIcons: Record<ViewType, LucideIcon> = {
   all: ListTodo,
   completed: CheckCircle2,
   inbox: Inbox,
-};
-
-const viewLabels: Record<ViewType, string> = {
-  today: "Today",
-  next7days: "Next 7 Days",
-  all: "All Tasks",
-  completed: "Completed",
-  inbox: "Inbox",
 };
 
 export function ViewItem({

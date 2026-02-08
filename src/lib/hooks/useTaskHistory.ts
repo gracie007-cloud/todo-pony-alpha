@@ -8,11 +8,6 @@ import useSWR from 'swr';
 import type { TaskHistory } from '@/lib/db/schema';
 import { api } from '@/lib/utils/api';
 
-interface TaskHistoryResponse {
-  success: boolean;
-  data: TaskHistory[];
-}
-
 /**
  * Hook to fetch change history for a task
  */

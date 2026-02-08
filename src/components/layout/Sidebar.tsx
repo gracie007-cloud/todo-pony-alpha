@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { motion, AnimatePresence, useSpring, useTransform, Variants } from "framer-motion";
+import { motion, AnimatePresence, useSpring, Variants } from "framer-motion";
 import { 
   ChevronLeft, 
   ChevronRight,

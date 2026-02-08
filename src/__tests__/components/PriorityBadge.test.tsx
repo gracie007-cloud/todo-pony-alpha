@@ -3,7 +3,7 @@
  * Tests priority display logic, configurations, and variant rendering
  */
 
-import { describe, test, expect, beforeEach } from "bun:test";
+import { describe, test, expect } from "bun:test";
 import type { Priority } from "@/lib/types";
 
 // Priority configuration extracted from component
@@ -267,7 +267,7 @@ describe("PriorityBadge Accessibility", () => {
 
   test("should have distinguishable colors for color-blind users", () => {
     // Each priority should have unique color class
-    const colorClasses = Object.entries(priorityConfig).map(([_, config]) => config.color);
+    const colorClasses = Object.values(priorityConfig).map((config) => config.color);
     const uniqueColors = new Set(colorClasses);
     expect(uniqueColors.size).toBe(colorClasses.length);
   });
@@ -276,8 +276,6 @@ describe("PriorityBadge Accessibility", () => {
 describe("PriorityBadge Edge Cases", () => {
   test("should handle invalid priority gracefully", () => {
     // Type safety should prevent this, but testing runtime behavior
-    const priority = "invalid" as Priority;
-    
     // This would fail at runtime in the actual component
     // For now, we test that valid priorities work
     expect(() => getPriorityClasses("high")).not.toThrow();

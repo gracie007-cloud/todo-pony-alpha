@@ -261,7 +261,7 @@ export function withApiMiddleware<T extends unknown[]>(
     
     // Apply rate limiting if configured
     if (options.rateLimit) {
-      const { checkRateLimit, rateLimitExceededResponse, addRateLimitHeaders } = await import('./rate-limit');
+      const { checkRateLimit, rateLimitExceededResponse } = await import('./rate-limit');
       const result = checkRateLimit(request, options.rateLimit);
       
       if (!result.success) {

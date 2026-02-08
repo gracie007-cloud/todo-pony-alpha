@@ -6,7 +6,7 @@
 
 import { describe, test, expect, beforeEach } from 'bun:test';
 import { getTestDatabase, clearTestDatabase, testUuid } from '../utils/mock-db';
-import { createTestList, createTestTask, DEFAULT_LIST_ID } from '../utils/fixtures';
+import { DEFAULT_LIST_ID } from '../utils/fixtures';
 import type { List } from '@/lib/db/schema';
 
 // Helper to create ListsRepository with test database
@@ -253,7 +253,7 @@ describe('ListsRepository', () => {
     
     test('should not delete default list', () => {
       // Default list should not be deleted
-      const result = repo.delete(DEFAULT_LIST_ID);
+      repo.delete(DEFAULT_LIST_ID);
       
       // The repository should prevent deletion of default list
       // But at DB level it would succeed, so we test the behavior

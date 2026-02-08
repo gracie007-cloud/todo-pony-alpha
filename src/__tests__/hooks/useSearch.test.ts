@@ -65,14 +65,17 @@ function createSimpleSearch<T>(
   };
 }
 
-function getNestedValue(obj: any, path: string): unknown {
+function getNestedValue(obj: Record<string, unknown>, path: string): unknown {
   return path.split('.').reduce((current, key) => {
     if (current === null || current === undefined) return undefined;
     if (Array.isArray(current)) {
       return current.map(item => item?.[key]);
     }
-    return current[key];
-  }, obj);
+    if (typeof current === 'object' && current !== null) {
+      return (current as Record<string, unknown>)[key];
+    }
+    return undefined;
+  }, obj as unknown);
 }
 
 // Simulate useSearch hook

@@ -4,7 +4,7 @@
  * Tests for debounce functionality.
  */
 
-import { describe, test, expect, beforeEach, afterEach } from 'bun:test';
+import { describe, test, expect } from 'bun:test';
 
 // Simulate useDebounce logic for testing
 function simulateDebounce<T>(value: T, delay: number = 300): {
