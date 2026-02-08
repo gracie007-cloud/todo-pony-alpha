@@ -1,9 +1,10 @@
 /**
  * useTasks Hook
- * 
+ *
  * Fetch tasks with filtering, create/update/delete operations.
  */
 
+import { useMemo } from 'react';
 import useSWR from 'swr';
 import type { TaskWithRelations, CreateTaskInput, UpdateTaskInput, Priority } from '@/lib/db/schema';
 import { api } from '@/lib/utils/api';
@@ -79,9 +80,18 @@ export function useTask(id: string | null) {
  * Hook to fetch today's tasks
  */
 export function useTodayTasks() {
-  const today = new Date();
-  const dateFrom = new Date(today.setHours(0, 0, 0, 0)).toISOString();
-  const dateTo = new Date(today.setHours(23, 59, 59, 999)).toISOString();
+  // Memoize date range to prevent unnecessary re-renders
+  const { dateFrom, dateTo } = useMemo(() => {
+    const today = new Date();
+    const from = new Date(today);
+    from.setHours(0, 0, 0, 0);
+    const to = new Date(today);
+    to.setHours(23, 59, 59, 999);
+    return {
+      dateFrom: from.toISOString(),
+      dateTo: to.toISOString(),
+    };
+  }, []); // Empty deps - only calculate once per component mount
 
   return useTasks({
     dateFrom,
@@ -103,16 +113,24 @@ export function useOverdueTasks() {
  * Hook to fetch tasks for the next 7 days
  */
 export function useWeekTasks() {
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  
-  const dateFrom = today.toISOString();
-  const dateTo = new Date(today);
-  dateTo.setDate(dateTo.getDate() + 7);
+  // Memoize date range to prevent unnecessary re-renders
+  const { dateFrom, dateTo } = useMemo(() => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    const from = today.toISOString();
+    const to = new Date(today);
+    to.setDate(to.getDate() + 7);
+    
+    return {
+      dateFrom: from,
+      dateTo: to.toISOString(),
+    };
+  }, []); // Empty deps - only calculate once per component mount
   
   return useTasks({
     dateFrom,
-    dateTo: dateTo.toISOString(),
+    dateTo,
     completed: false,
   });
 }

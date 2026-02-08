@@ -98,6 +98,7 @@ export interface Task {
   recurring_rule: string | null;
   completed: boolean;
   completed_at: DateTimeString | null;
+  deleted_at: DateTimeString | null;
   created_at: DateTimeString;
   updated_at: DateTimeString;
 }
@@ -115,6 +116,7 @@ export const taskSchema = z.object({
   recurring_rule: z.string().max(1000).nullable(),
   completed: z.boolean().default(false),
   completed_at: dateTimeSchema.nullable(),
+  deleted_at: dateTimeSchema.nullable(),
   created_at: dateTimeSchema,
   updated_at: dateTimeSchema,
 });
@@ -123,6 +125,7 @@ export const createTaskSchema = taskSchema.omit({
   id: true,
   completed: true,
   completed_at: true,
+  deleted_at: true,
   created_at: true,
   updated_at: true,
 });

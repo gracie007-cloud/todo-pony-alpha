@@ -1,9 +1,9 @@
 /**
  * Tasks API Routes
- * 
- * GET /api/tasks - Get all tasks with optional filtering
+ *
+ * GET /api/tasks - Get all tasks with optional filtering and pagination
  * POST /api/tasks - Create a new task
- * 
+ *
  * Query Parameters:
  * - listId: Filter by list
  * - dateFrom, dateTo: Date range filter
@@ -12,14 +12,20 @@
  * - overdue: Get overdue tasks only (true)
  * - search: Search in name/description
  * - labelId: Filter by label
+ * - page: Page number for pagination (default: 1)
+ * - limit: Items per page (default: 50, max: 100)
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { getTasksRepository, TaskFilterOptions } from '@/lib/db/repositories';
+import { getTasksRepository, TaskFilterOptions, PaginationOptions } from '@/lib/db/repositories';
 import { createTaskSchema, uuidSchema, prioritySchema } from '@/lib/db/schema';
 import { z } from 'zod';
+import { withApiMiddleware, rateLimitPresets } from '@/lib/api';
 
-export async function GET(request: NextRequest) {
+/**
+ * GET /api/tasks - Get all tasks with optional filtering and pagination
+ */
+async function getTasksHandler(request: NextRequest): Promise<NextResponse> {
   try {
     const { searchParams } = new URL(request.url);
     
@@ -66,20 +72,20 @@ export async function GET(request: NextRequest) {
       filters.labelId = labelId;
     }
     
+    // Parse pagination parameters
+    const page = Math.max(1, parseInt(searchParams.get('page') || '1', 10));
+    const limit = Math.min(100, Math.max(1, parseInt(searchParams.get('limit') || '50', 10)));
+    const pagination: PaginationOptions = { page, limit };
+    
     const repo = getTasksRepository();
     
-    // Use appropriate method based on filters
-    let tasks;
-    if (Object.keys(filters).length === 0) {
-      tasks = repo.findAll();
-    } else {
-      tasks = repo.findWithFilters(filters);
-    }
+    // Use paginated method
+    const result = repo.findWithFiltersPaginated(filters, pagination);
     
-    return NextResponse.json({ 
-      success: true, 
-      data: tasks,
-      count: tasks.length
+    return NextResponse.json({
+      success: true,
+      data: result.data,
+      pagination: result.pagination
     });
   } catch (error) {
     console.error('Error fetching tasks:', error);
@@ -90,7 +96,10 @@ export async function GET(request: NextRequest) {
   }
 }
 
-export async function POST(request: NextRequest) {
+/**
+ * POST /api/tasks - Create a new task
+ */
+async function createTaskHandler(request: NextRequest): Promise<NextResponse> {
   try {
     const body = await request.json();
     
@@ -119,3 +128,12 @@ export async function POST(request: NextRequest) {
     );
   }
 }
+
+// Export handlers wrapped with API middleware (logging + rate limiting)
+export const GET = withApiMiddleware(getTasksHandler, {
+  rateLimit: rateLimitPresets.relaxed
+});
+
+export const POST = withApiMiddleware(createTaskHandler, {
+  rateLimit: rateLimitPresets.standard
+});

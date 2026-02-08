@@ -1,6 +1,6 @@
 /**
  * Database Connection and Initialization
- * 
+ *
  * This module provides the SQLite database connection using better-sqlite3
  * and handles schema initialization and seeding.
  */
@@ -8,6 +8,7 @@
 import Database from 'better-sqlite3';
 import { v4 as uuidv4 } from 'uuid';
 import path from 'path';
+import fs from 'fs';
 
 // Database file path - stored in the project root
 const DB_PATH = path.join(process.cwd(), 'data', 'tasks.db');
@@ -21,7 +22,6 @@ let db: Database.Database | null = null;
 export function getDatabase(): Database.Database {
   if (!db) {
     // Ensure data directory exists
-    const fs = require('fs');
     const dataDir = path.dirname(DB_PATH);
     if (!fs.existsSync(dataDir)) {
       fs.mkdirSync(dataDir, { recursive: true });
@@ -74,6 +74,7 @@ function initializeSchema(db: Database.Database): void {
       recurring_rule TEXT,
       completed INTEGER NOT NULL DEFAULT 0,
       completed_at TEXT,
+      deleted_at TEXT,
       created_at TEXT NOT NULL,
       updated_at TEXT NOT NULL,
       FOREIGN KEY (list_id) REFERENCES lists(id) ON DELETE CASCADE

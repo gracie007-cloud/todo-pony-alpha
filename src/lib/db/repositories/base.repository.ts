@@ -1,12 +1,38 @@
 /**
  * Base Repository
- * 
+ *
  * Provides common CRUD operations for all repositories.
  * Uses prepared statements for security and performance.
  */
 
 import Database from 'better-sqlite3';
 import { getDatabase, uuidv4, now } from '../index';
+
+/**
+ * Allowed table names for SQL interpolation
+ * This prevents SQL injection via table name parameters
+ */
+const ALLOWED_TABLES = [
+  'lists',
+  'tasks',
+  'labels',
+  'task_labels',
+  'subtasks',
+  'reminders',
+  'attachments',
+  'task_history',
+] as const;
+
+type AllowedTable = typeof ALLOWED_TABLES[number];
+
+/**
+ * Validates that a table name is in the allowlist
+ */
+function validateTableName(tableName: string): asserts tableName is AllowedTable {
+  if (!ALLOWED_TABLES.includes(tableName as AllowedTable)) {
+    throw new Error(`Invalid table name: ${tableName}. Table must be one of: ${ALLOWED_TABLES.join(', ')}`);
+  }
+}
 
 /**
  * Base repository class with common database operations
@@ -17,6 +43,8 @@ export abstract class BaseRepository<T, CreateInput, UpdateInput> {
   protected idColumn: string;
 
   constructor(tableName: string, idColumn: string = 'id') {
+    // Validate table name against allowlist for security
+    validateTableName(tableName);
     this.tableName = tableName;
     this.idColumn = idColumn;
     this.db = getDatabase();

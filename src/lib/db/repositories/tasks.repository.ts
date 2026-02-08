@@ -1,18 +1,26 @@
 /**
  * Tasks Repository
- * 
+ *
  * Handles CRUD operations for tasks with filtering support
  * and automatic change logging.
  */
 
 import { BaseRepository } from './base.repository';
-import { 
-  Task, 
-  CreateTaskInput, 
+import {
+  Task,
+  CreateTaskInput,
   UpdateTaskInput,
   TaskWithRelations,
   Priority
 } from '../schema';
+
+/**
+ * Escape special characters in SQL LIKE pattern
+ * Escapes %, _, and \ to prevent them from being interpreted as wildcards
+ */
+export function escapeLikePattern(pattern: string): string {
+  return pattern.replace(/[%_\\]/g, '\\$&');
+}
 
 export interface TaskFilterOptions {
   listId?: string;
@@ -23,6 +31,33 @@ export interface TaskFilterOptions {
   overdue?: boolean;
   search?: string;
   labelId?: string;
+  /** Include soft-deleted tasks in results */
+  includeDeleted?: boolean;
+  /** Only return soft-deleted tasks */
+  deletedOnly?: boolean;
+}
+
+/**
+ * Pagination options for queries
+ */
+export interface PaginationOptions {
+  page: number;
+  limit: number;
+}
+
+/**
+ * Paginated result wrapper
+ */
+export interface PaginatedResult<T> {
+  data: T[];
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+    hasNext: boolean;
+    hasPrev: boolean;
+  };
 }
 
 export class TasksRepository extends BaseRepository<Task, CreateTaskInput, UpdateTaskInput> {
@@ -224,6 +259,13 @@ export class TasksRepository extends BaseRepository<Task, CreateTaskInput, Updat
     const conditions: string[] = [];
     const values: unknown[] = [];
 
+    // Handle soft delete filtering
+    if (options.deletedOnly) {
+      conditions.push('deleted_at IS NOT NULL');
+    } else if (!options.includeDeleted) {
+      conditions.push('deleted_at IS NULL');
+    }
+
     if (options.listId) {
       conditions.push('list_id = ?');
       values.push(options.listId);
@@ -256,8 +298,9 @@ export class TasksRepository extends BaseRepository<Task, CreateTaskInput, Updat
     }
 
     if (options.search) {
-      conditions.push('(name LIKE ? OR description LIKE ?)');
-      const searchTerm = `%${options.search}%`;
+      conditions.push('(name LIKE ? ESCAPE \'\\\' OR description LIKE ? ESCAPE \'\\\')');
+      const escapedSearch = escapeLikePattern(options.search);
+      const searchTerm = `%${escapedSearch}%`;
       values.push(searchTerm, searchTerm);
     }
 
@@ -277,6 +320,96 @@ export class TasksRepository extends BaseRepository<Task, CreateTaskInput, Updat
     sql += ' ORDER BY date ASC, created_at DESC';
 
     return this.queryAll<Task>(sql, ...values);
+  }
+
+  /**
+   * Find tasks with filtering and pagination options
+   */
+  findWithFiltersPaginated(
+    options: TaskFilterOptions,
+    pagination: PaginationOptions
+  ): PaginatedResult<Task> {
+    const conditions: string[] = [];
+    const values: unknown[] = [];
+
+    // Handle soft delete filtering
+    if (options.deletedOnly) {
+      conditions.push('deleted_at IS NOT NULL');
+    } else if (!options.includeDeleted) {
+      conditions.push('deleted_at IS NULL');
+    }
+
+    if (options.listId) {
+      conditions.push('list_id = ?');
+      values.push(options.listId);
+    }
+
+    if (options.dateFrom) {
+      conditions.push('date >= ?');
+      values.push(options.dateFrom);
+    }
+
+    if (options.dateTo) {
+      conditions.push('date <= ?');
+      values.push(options.dateTo);
+    }
+
+    if (options.completed !== undefined) {
+      conditions.push('completed = ?');
+      values.push(options.completed ? 1 : 0);
+    }
+
+    if (options.priority) {
+      conditions.push('priority = ?');
+      values.push(options.priority);
+    }
+
+    if (options.overdue) {
+      conditions.push('deadline < ?');
+      conditions.push('completed = 0');
+      values.push(this.timestamp());
+    }
+
+    if (options.search) {
+      conditions.push('(name LIKE ? ESCAPE \'\\\' OR description LIKE ? ESCAPE \'\\\')');
+      const escapedSearch = escapeLikePattern(options.search);
+      const searchTerm = `%${escapedSearch}%`;
+      values.push(searchTerm, searchTerm);
+    }
+
+    if (options.labelId) {
+      conditions.push(`
+        id IN (SELECT task_id FROM task_labels WHERE label_id = ?)
+      `);
+      values.push(options.labelId);
+    }
+
+    const whereClause = conditions.length > 0 ? ' WHERE ' + conditions.join(' AND ') : '';
+    
+    // Get total count
+    const countSql = `SELECT COUNT(*) as count FROM tasks${whereClause}`;
+    const countResult = this.queryOne<{ count: number }>(countSql, ...values);
+    const total = countResult?.count ?? 0;
+    
+    // Calculate pagination values
+    const totalPages = Math.ceil(total / pagination.limit);
+    const offset = (pagination.page - 1) * pagination.limit;
+    
+    // Get paginated data
+    const dataSql = `SELECT * FROM tasks${whereClause} ORDER BY date ASC, created_at DESC LIMIT ? OFFSET ?`;
+    const data = this.queryAll<Task>(dataSql, ...values, pagination.limit, offset);
+
+    return {
+      data,
+      pagination: {
+        page: pagination.page,
+        limit: pagination.limit,
+        total,
+        totalPages,
+        hasNext: pagination.page < totalPages,
+        hasPrev: pagination.page > 1
+      }
+    };
   }
 
   /**
@@ -390,9 +523,89 @@ export class TasksRepository extends BaseRepository<Task, CreateTaskInput, Updat
    * Get completed task count by list
    */
   completedCountByList(listId: string): number {
-    const sql = `SELECT COUNT(*) as count FROM tasks WHERE list_id = ? AND completed = 1`;
+    const sql = `SELECT COUNT(*) as count FROM tasks WHERE list_id = ? AND completed = 1 AND deleted_at IS NULL`;
     const result = this.queryOne<{ count: number }>(sql, listId);
     return result?.count ?? 0;
+  }
+
+  /**
+   * Soft delete a task (sets deleted_at timestamp)
+   */
+  softDelete(id: string): Task | undefined {
+    const existing = this.findById(id);
+    if (!existing) {
+      return undefined;
+    }
+
+    const timestamp = this.timestamp();
+    const sql = `UPDATE tasks SET deleted_at = ?, updated_at = ? WHERE id = ?`;
+    this.query(sql, timestamp, timestamp, id);
+
+    // Log the deletion
+    this.logChange(id, 'deleted_at', null, timestamp);
+
+    return this.findById(id);
+  }
+
+  /**
+   * Restore a soft-deleted task (clears deleted_at timestamp)
+   */
+  restore(id: string): Task | undefined {
+    const existing = this.findById(id);
+    if (!existing) {
+      return undefined;
+    }
+
+    const timestamp = this.timestamp();
+    const sql = `UPDATE tasks SET deleted_at = NULL, updated_at = ? WHERE id = ?`;
+    this.query(sql, timestamp, id);
+
+    // Log the restoration
+    this.logChange(id, 'deleted_at', existing.deleted_at, null);
+
+    return this.findById(id);
+  }
+
+  /**
+   * Permanently delete a task (use with caution)
+   * This will also delete all related data (subtasks, reminders, etc.) via CASCADE
+   */
+  permanentDelete(id: string): boolean {
+    return this.delete(id);
+  }
+
+  /**
+   * Find all soft-deleted tasks
+   */
+  findDeleted(): Task[] {
+    const sql = `SELECT * FROM tasks WHERE deleted_at IS NOT NULL ORDER BY deleted_at DESC`;
+    return this.queryAll<Task>(sql);
+  }
+
+  /**
+   * Find soft-deleted tasks for a specific list
+   */
+  findDeletedByList(listId: string): Task[] {
+    const sql = `SELECT * FROM tasks WHERE list_id = ? AND deleted_at IS NOT NULL ORDER BY deleted_at DESC`;
+    return this.queryAll<Task>(sql, listId);
+  }
+
+  /**
+   * Permanently delete all soft-deleted tasks (cleanup operation)
+   */
+  purgeDeleted(): number {
+    const sql = `DELETE FROM tasks WHERE deleted_at IS NOT NULL`;
+    const result = this.query(sql);
+    return result.changes;
+  }
+
+  /**
+   * Permanently delete soft-deleted tasks older than a specified date
+   */
+  purgeDeletedOlderThan(date: string): number {
+    const sql = `DELETE FROM tasks WHERE deleted_at IS NOT NULL AND deleted_at < ?`;
+    const result = this.query(sql, date);
+    return result.changes;
   }
 }
 

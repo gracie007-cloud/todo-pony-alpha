@@ -22,8 +22,13 @@ export {
   ErrorState,
   EmptyStateIllustration 
 } from "./EmptyState";
-export { 
-  OverdueBadge, 
-  OverdueCounter, 
-  OverdueIndicator 
+export {
+  OverdueBadge,
+  OverdueCounter,
+  OverdueIndicator
 } from "./OverdueBadge";
+export {
+  ErrorBoundary,
+  withErrorBoundary,
+  useErrorBoundary
+} from "./ErrorBoundary";

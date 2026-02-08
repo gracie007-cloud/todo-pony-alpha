@@ -9,8 +9,8 @@ export { BaseRepository, CompositeKeyRepository } from './base.repository';
 
 // Entity repositories
 export { ListsRepository, getListsRepository } from './lists.repository';
-export { TasksRepository, getTasksRepository } from './tasks.repository';
-export type { TaskFilterOptions } from './tasks.repository';
+export { TasksRepository, getTasksRepository, escapeLikePattern } from './tasks.repository';
+export type { TaskFilterOptions, PaginationOptions, PaginatedResult } from './tasks.repository';
 export { LabelsRepository, getLabelsRepository, TaskLabelsRepository, getTaskLabelsRepository } from './labels.repository';
 export { SubtasksRepository, getSubtasksRepository } from './subtasks.repository';
 export { RemindersRepository, getRemindersRepository } from './reminders.repository';

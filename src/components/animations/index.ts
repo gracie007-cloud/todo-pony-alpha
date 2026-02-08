@@ -1,12 +1,15 @@
+// Animation variants
+export * from "./variants";
+
 // Animation components
 export { PageTransition, PresenceTransition } from "./PageTransition";
 export { FadeIn, FadeInQuick } from "./FadeIn";
 export { StaggerContainer, StaggerItem, StaggerList } from "./StaggerContainer";
 export { SlideIn, SlideInPresence, SlidePanel } from "./SlideIn";
-export { 
-  AnimatedList, 
-  AnimatedListItem, 
-  AnimatedListContainer 
+export {
+  AnimatedList,
+  AnimatedListItem,
+  AnimatedListContainer
 } from "./AnimatedList";
 
 // Gesture support components
